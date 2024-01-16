@@ -3,13 +3,12 @@
 import tkinter as tk
 import random
 
-
 master = tk.Tk()
 master.title("Blackjack")
 master.geometry("800x600")
 master.resizable(False, False)
 
-sprites_dir = "C:/Users/aaronhampson/Downloads/chipi chapa/OUTPUT"
+sprites_dir = "C:/Users/aaron/Desktop/blackjack-main/cards"
 card_back_sprite = tk.PhotoImage(file=f"{sprites_dir}/BACK.png")
 
 suites = ["hearts", "diamonds", "spades", "clubs"]
@@ -45,6 +44,9 @@ def shuffle_and_draw():
     player_hand.append(deck.pop())
     dealer_hand.append(deck.pop())
 
+    if "A" in [i.value for i in player_hand] and ["J","Q","K"] in [i.value for i in player_hand]:
+        print("Blackjack!")
+
 def draw_sprites():
     global cards_drawn, dealer_cards_drawn
 
@@ -68,14 +70,32 @@ def draw_card():
     cards_drawn += 1
     draw_sprites()
 
-def stick_cards():
-    global deck, dealer_hand, cards_drawn, dealer_cards_drawn
+def calculate_hand():
+    global player_hand
 
     for i in player_hand:
         if i.value == "A":
             i.value = 11
         elif i.value in ["J", "Q", "K"]:
             i.value = 10
+    
+    cur_sum = sum([i.value for i in player_hand])
+
+    if cur_sum > 21:
+        for j in player_hand:
+            if j.value == 11:
+                j.value = 1
+                cur_sum -= 10
+                if cur_sum <= 21:
+                    break
+    
+    return cur_sum
+
+
+def stick_cards():
+    global deck, dealer_hand, cards_drawn, dealer_cards_drawn, player_hand, draw, stick
+
+    draw.config(state="disabled")
     
     for i in dealer_hand:
         if i.value == "A":
@@ -86,8 +106,18 @@ def stick_cards():
     while sum([i.value for i in dealer_hand]) < 17:
         dealer_hand.append(deck.pop())
         dealer_cards_drawn += 1
-        show_dealer_hand()
-
+    
+    show_dealer_hand()
+    
+    if sum([i.value for i in dealer_hand]) > 21:
+        print("Dealer bust!")
+    elif sum([i.value for i in dealer_hand]) > sum([i.value for i in player_hand]):
+        print("Dealer wins!")
+    elif sum([i.value for i in dealer_hand]) < sum([i.value for i in player_hand]):
+        print("Player wins!")
+    else:
+        print("Draw!")
+    
     
     
 
